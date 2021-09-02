@@ -3,7 +3,8 @@ FROM ${AIRFLOW_BASE_IMAGE}
 
 ENV PYTHONPATH "${PYTHONPATH}:/opt/airflow"
 
+COPY requirements.txt /opt/airflow/requirements.txt
+
 USER airflow
 
-RUN pip install pytest pytest-helpers-namespace pytest-mock pytest-docker-tools \
-    pip install requests
+RUN pip install -r requirements.txt

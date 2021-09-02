@@ -33,6 +33,7 @@ class TestOperators:
                 'time': '2021-07-16T11:33:11+00:00',
             },
         )
+        
         ti = MockTaskInstance()
         operator.execute(context={'ti': ti})
         res = ti.xcom_pull('open_price')

@@ -1,0 +1,5 @@
+requests==2.25.1
+pytest==6.2.4
+pytest-helpers-namespace==2021.4.29
+pytest-mock==3.6.1
+pytest-docker-tools==3.0.0

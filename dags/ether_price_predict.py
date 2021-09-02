@@ -31,7 +31,6 @@ def _get_price(ti, symbol, interval, time, limit=1, **_):
     response = requests.get(url)
     data = response.json()
     open_price = int(float(data[0][1]))
-    print(type(open_price))   
     ti.xcom_push(key='open_price', value=open_price)
 
 
@@ -49,8 +48,6 @@ get_price = PythonOperator(
 
 def _create_query(ti, execution_date):
     price = ti.xcom_pull(key='open_price', task_ids='get_price')
-    logger.info('type: ')
-    logger.info(type(price))
     with open("/tmp/postgres_query.sql", "w") as f:
         f.write(
             "INSERT INTO prices VALUES ("
