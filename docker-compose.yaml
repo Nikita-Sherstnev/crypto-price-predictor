@@ -1,8 +1,9 @@
 version: '3.7'
 # ====================================== AIRFLOW ENVIRONMENT VARIABLES =======================================
 x-environment: &airflow_environment
-  # Airflow settings.
-  - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+  - AIRFLOW__CELERY__BROKER_URL=amqp://user:pass@localhost:5672/
+  - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres:5432/airflow
+  - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
   - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
   - AIRFLOW__CORE__LOAD_EXAMPLES=False
   - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://airflow:airflow@postgres:5432/airflow
@@ -75,7 +76,43 @@ services:
     environment: *airflow_environment
     command: airflow scheduler
 
+  worker:
+    image: apache/airflow:2.1.0-python3.8
+    restart: always
+    depends_on:
+      - scheduler
+    volumes:
+      - ./ether_price_predict.py:/opt/airflow/dags/ether_price_predict.py
+      - logs:/opt/airflow/logs
+    environment: *airflow_environment
+    command: celery worker
+
+  flower:
+    image: apache/airflow:2.1.0-python3.8
+    restart: always
+    depends_on:
+      - worker
+    ports:
+      - "5555:5555"
+    environment: *airflow_environment
+    command: celery flower
+
+  rabbitmq:
+    image: rabbitmq:3.8.9-management
+    restart: unless-stopped
+    volumes:
+    - rabbitmqdata:/etc/rabbitmq
+    - queuedata:/var/lib/rabbitmq/mnesia
+    ports:
+    - "5672:5672"
+    - "15672:15672"
+    environment: *airflow_environment
+
 volumes:
   data:
   logs:
   tests:
+  queuedata:
+    driver: local
+  rabbitmqdata:
+    driver: local
