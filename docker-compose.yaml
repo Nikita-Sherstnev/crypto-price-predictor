@@ -75,6 +75,12 @@ services:
       - "5433:5432"
     volumes:
       - ./scripts/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
+      - prices-postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    restart: always
 
   redis:
     image: redis:latest
@@ -242,3 +248,4 @@ services:
 
 volumes:
   postgres-db-volume:
+  prices-postgres-db-volume:
